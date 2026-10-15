@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проверка скрытой метки</title>
+<meta name="description" content="Проверка картинки на скрытую метку с номером свидетельства COPYTRUST. Картинки не покидают ваш компьютер.">
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #1d2228; --muted: #5f6b78; --line: #d9dee4;
+    --accent: #2f6fdb; --ok-bg: #e7f6ec; --ok: #1d7a3a; --none-bg: #f1f3f5; --err-bg: #fdecec; --err: #b42323;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171b; --panel: #1c2026; --text: #e8ebef; --muted: #9aa5b1; --line: #2e343c;
+      --accent: #7aa7ff; --ok-bg: #173323; --ok: #6fd391; --none-bg: #22272e; --err-bg: #3a1d1d; --err: #ff8a8a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 28px 16px 48px; }
+  h1 { font-size: 26px; line-height: 1.25; margin: 0 0 8px; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); }
+  #drop { margin: 20px 0 8px; padding: 36px 20px; border: 2px dashed var(--line); border-radius: 14px; background: var(--panel);
+          text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
+  #drop:hover, #drop:focus-visible, #drop.over { border-color: var(--accent); outline: none; }
+  #drop .big { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  #status { min-height: 1.5em; font-size: 14px; }
+  #results { display: grid; gap: 12px; margin-top: 16px; }
+  .card { display: grid; grid-template-columns: 96px 1fr; gap: 14px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+  .card img { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; background: var(--none-bg); }
+  .name { font-size: 13px; color: var(--muted); word-break: break-all; }
+  .verdict { font-weight: 600; font-size: 17px; margin: 2px 0 4px; padding: 2px 8px; border-radius: 6px; display: inline-block; }
+  .verdict.ok { background: var(--ok-bg); color: var(--ok); }
+  .verdict.none { background: var(--none-bg); }
+  .verdict.err { background: var(--err-bg); color: var(--err); }
+  .verdict.wait { font-weight: 400; color: var(--muted); padding-left: 0; }
+  .note { font-size: 14px; color: var(--muted); }
+  .note a { color: var(--accent); }
+  details { margin-top: 28px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin-top: 10px; }
+  footer { margin-top: 28px; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Проверка скрытой метки</h1>
+  <p class="muted">Покажет номер свидетельства COPYTRUST, если в картинке есть скрытая метка. Картинки никуда не отправляются, проверка идёт прямо в вашем браузере.</p>
+
+  <div id="drop" tabindex="0" role="button" aria-label="Выбрать картинки для проверки">
+    <div class="big">Перетащите картинки сюда</div>
+    <div class="muted">или нажмите, чтобы выбрать файлы, или вставьте картинку через Ctrl+V</div>
+  </div>
+  <input id="file" type="file" accept="image/*" multiple hidden>
+  <div id="status" class="muted"></div>
+
+  <div id="results" aria-live="polite"></div>
+
+  <details>
+    <summary>Как проверить картинку из чужой карточки на Озоне</summary>
+    <p>Откройте фото в карточке, нажмите на него правой кнопкой мыши и выберите «Копировать картинку». Вернитесь сюда и нажмите Ctrl+V. Или выберите «Сохранить картинку как…» и перетащите сохранённый файл сюда.</p>
+    <p>Можно проверить сразу несколько картинок: перетащите их вместе.</p>
+  </details>
+
+  <details>
+    <summary>Когда метку не прочитать</summary>
+    <p>Метка переживает пережатие, уменьшение, обрезку краёв, зеркало, смену яркости и рамку. Её не будет, если картинку перерисовали, сфотографировали с экрана или сильно уменьшили и вставили в коллаж. На картинках без метки проверка всегда показывает «Метки нет».</p>
+  </details>
+
+  <footer>
+    Метка сделана открытой технологией <a href="https://github.com/adobe/trustmark" target="_blank" rel="noopener">TrustMark от Adobe</a>, поэтому любой эксперт может повторить проверку сам.
+  </footer>
+</main>
+<script src="ort/ort.wasm.min.js"></script>
+<script src="lib/bch_ecc.min.js"></script>
+<script src="lib/tm_datalayer.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
