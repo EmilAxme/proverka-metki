@@ -14,8 +14,18 @@ ort.env.wasm.wasmPaths = new URL('ort/', location.href).href;
 ort.env.wasm.numThreads = 1;
 
 let sessionPromise = null;
+const listeners = new Set();
 
+// одна загрузка на всех: прогресс получают и строка статуса, и каждая карточка, которая ждёт модель
 function loadModel(onProgress) {
+  if (onProgress) listeners.add(onProgress);
+  const p = startLoad();
+  p.then(() => listeners.delete(onProgress), () => listeners.delete(onProgress));
+  return p;
+}
+
+function startLoad() {
+  const onProgress = v => listeners.forEach(f => f(v));
   if (!sessionPromise) {
     sessionPromise = (async () => {
       const r = await fetch(MODEL_URL);
@@ -275,8 +285,14 @@ document.addEventListener('paste', e => {
   if (files.length) handle(files);
 });
 
-// тихо подгружаем модель заранее, пока человек ищет картинку
-loadModel(() => {}).then(() => { status.textContent = 'Модель проверки загружена.'; }).catch(() => {});
+// подгружаем модель заранее, пока человек ищет картинку
+function preload() {
+  status.textContent = 'Загружаю модель проверки…';
+  loadModel(p => { status.textContent = `Загружаю модель проверки: ${Math.round(p * 100)}%. Это один раз, дальше быстро.`; })
+    .then(() => { status.textContent = 'Модель проверки загружена, можно проверять.'; })
+    .catch(() => { status.textContent = 'Модель проверки не загрузилась. Проверьте интернет: при следующей картинке попробую ещё раз.'; });
+}
+preload();
 
 // для автотеста: window.__check(file) → {cert, how} | null
 window.__check = async file => findMark(await loadModel(() => {}), await decodeFile(file), () => {});
