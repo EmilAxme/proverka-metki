@@ -4,6 +4,8 @@
 'use strict';
 
 const MODEL_URL = 'model/decoder_P.onnx';
+// GitHub Pages отдаёт модель сжатой: content-length там меньше распакованных байт, и проценты уходили за 100
+const MODEL_BYTES = 23891025;
 const CROPS = [1.0, 0.95, 0.9, 0.86, 0.8, 0.75, 0.7];
 const ABC = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const SIZE = 224;
@@ -18,7 +20,8 @@ function loadModel(onProgress) {
     sessionPromise = (async () => {
       const r = await fetch(MODEL_URL);
       if (!r.ok) throw new Error('модель не загрузилась: ' + r.status);
-      const total = Number(r.headers.get('content-length')) || 0;
+      const len = Number(r.headers.get('content-length')) || 0;
+      const total = !r.headers.get('content-encoding') && len ? len : MODEL_BYTES;
       const reader = r.body.getReader();
       const parts = [];
       let got = 0;
@@ -27,7 +30,7 @@ function loadModel(onProgress) {
         if (done) break;
         parts.push(value);
         got += value.length;
-        if (total) onProgress(got / total);
+        onProgress(Math.min(got / total, 0.99));
       }
       const buf = new Uint8Array(got);
       let off = 0;
